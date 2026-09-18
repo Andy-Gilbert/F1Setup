@@ -56,3 +56,23 @@ tests across a session and it narrows in further each time.
 
 No license file is attached — add whichever you prefer (MIT is a reasonable
 default for something like this) before making the repo public.
+
+## Turning it into an Android APK
+
+Once it's live on GitHub Pages (or Cloudflare Pages), you can package it as a
+real, installable `.apk` using **PWABuilder** (pwabuilder.com) — free, no coding,
+no Android Studio.
+
+1. Go to https://www.pwabuilder.com
+2. Paste in your GitHub Pages URL and click "Start".
+3. It'll detect `manifest.json` automatically — that's where the app's name,
+   colors and icons come from (edit that file in the repo to rename it or point
+   at different icon files).
+4. Click "Package for stores" → Android. You can upload your own logo image
+   right there in the wizard if you don't want the placeholder checkered-flag
+   icon included in this repo (`icon-192.png` / `icon-512.png`) — any square
+   image works, PWABuilder resizes it for you.
+5. Download the generated `.apk`. Transfer it to your phone (email, USB, cloud
+   drive — whatever's easiest) and tap it to install. Android will warn about
+   "installing from unknown sources" the first time — that's normal for an APK
+   that isn't from the Play Store, not a sign anything's wrong.
