@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Setup Garage — F1 Manager 24</title>
+<meta name="theme-color" content="#0B0E12">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Setup Garage">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0B0E12; --panel:#12161C; --panel-raised:#161B22; --line:#232830;
+    --text:#E7ECEF; --text-dim:#8B94A0; --text-faint:#5B6270;
+    --go:#35D0A6; --go-dim:#1E4A3F; --warn:#E0B23C; --bad:#E0574B;
+    --driverA:#4C8DFF; --driverA-dim:#1B2A45; --driverB:#FF6A3D; --driverB-dim:#3A2216;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --bg:#0B0E12; --panel:#12161C; --panel-raised:#161B22; --line:#232830;
+      --text:#E7ECEF; --text-dim:#8B94A0; --text-faint:#5B6270;
+    }
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{ background:var(--bg); color:var(--text); font-family:'Inter',system-ui,sans-serif; min-height:100vh; padding:18px 16px 60px; }
+  .wrap{ max-width:920px; margin:0 auto; }
+
+  .topbar{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
+  .brand{ display:flex; align-items:baseline; gap:8px; }
+  .brand .mark{ font-family:'Rajdhani',sans-serif; font-weight:700; font-size:22px; letter-spacing:0.5px; }
+  .brand .sub{ font-size:12px; color:var(--text-faint); }
+  select{ background:var(--panel-raised); color:var(--text); border:1px solid var(--line); border-radius:6px; padding:9px 12px; font-size:14px; font-family:'Inter',sans-serif; }
+
+  .drivertabs{ display:flex; gap:6px; margin-bottom:16px; }
+  .drivertab{ flex:1; text-align:center; padding:10px 8px; border-radius:8px; border:1px solid var(--line); background:var(--panel); cursor:pointer; font-family:'Rajdhani',sans-serif; font-weight:600; font-size:15px; color:var(--text-dim); position:relative; }
+  .drivertab input{ background:transparent; border:none; color:inherit; font:inherit; text-align:center; width:100%; outline:none; }
+  .drivertab.active{ color:var(--text); border-color:transparent; }
+  .drivertab.active[data-driver="A"]{ background:var(--driverA-dim); box-shadow:inset 0 0 0 1px var(--driverA); }
+  .drivertab.active[data-driver="B"]{ background:var(--driverB-dim); box-shadow:inset 0 0 0 1px var(--driverB); }
+
+  .grid{ display:grid; grid-template-columns:1fr; gap:14px; }
+  @media(min-width:760px){ .grid{ grid-template-columns:1fr 1fr; } }
+
+  .panel{ background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:14px 14px 12px; }
+  .panel h2{ font-family:'Rajdhani',sans-serif; font-size:13px; font-weight:600; letter-spacing:0.6px; color:var(--text-dim); margin:0 0 10px; }
+
+  .slider-row{ padding:10px 0; border-top:1px solid var(--line); }
+  .slider-row:first-of-type{ border-top:none; }
+  .slider-row .rowtop{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px; }
+  .slider-row label{ font-size:13.5px; color:var(--text); }
+  .slider-row .val{ font-family:'JetBrains Mono',monospace; font-size:14px; color:var(--go); min-width:64px; text-align:right; }
+  .slider-row input[type=range]{ width:100%; -webkit-appearance:none; height:26px; background:transparent; cursor:pointer; touch-action:pan-y; }
+  .slider-row input[type=range]:disabled{ cursor:default; opacity:0.55; }
+  .slider-row input[type=range]:disabled::-webkit-slider-thumb{ border-color:var(--text-faint); }
+  .slider-row input[type=range]:disabled::-moz-range-thumb{ border-color:var(--text-faint); }
+  .slider-row input[type=range]::-webkit-slider-runnable-track{ height:4px; background:var(--line); border-radius:2px; }
+  .slider-row input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; width:14px; height:14px; margin-top:-5px; border-radius:50%; background:var(--text); border:2px solid var(--go); cursor:pointer; }
+  .slider-row input[type=range]::-moz-range-track{ height:4px; background:var(--line); border-radius:2px; }
+  .slider-row input[type=range]::-moz-range-thumb{ width:12px; height:12px; border-radius:50%; background:var(--text); border:2px solid var(--go); cursor:pointer; }
+  .slider-row .rangehint{ font-size:10.5px; color:var(--text-faint); margin-top:4px; }
+
+  .hint-toggle{ font-size:11px; color:var(--text-faint); cursor:pointer; user-select:none; margin-top:6px; display:inline-block; }
+  .hint-toggle:hover{ color:var(--text-dim); }
+  .hint-text{ display:none; font-size:12px; line-height:1.5; color:var(--text-dim); background:var(--panel-raised); border-left:2px solid var(--go); padding:8px 10px; border-radius:0 6px 6px 0; margin-top:6px; }
+  .hint-text.open{ display:block; }
+
+  .bal-row{ padding:11px 0; border-top:1px solid var(--line); }
+  .bal-row:first-of-type{ border-top:none; }
+  .bal-top{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px; }
+  .bal-top .name{ font-size:13.5px; }
+  .feedback-pills{ display:flex; flex-wrap:wrap; gap:5px; }
+  .pill{ font-family:'Inter',sans-serif; font-size:11.5px; padding:6px 9px; border-radius:999px; border:1px solid var(--line); background:var(--panel-raised); color:var(--text-dim); cursor:pointer; }
+  .pill:hover{ border-color:var(--text-faint); }
+  .pill.active{ background:var(--go-dim); border-color:var(--go); color:var(--go); }
+  .pill-bad.active{ background:#3A1A17; border-color:var(--bad); color:var(--bad); }
+  .pill-unknown.active{ background:var(--panel-raised); border-color:var(--text-faint); color:var(--text-faint); }
+
+  .satisfaction{ display:flex; align-items:center; justify-content:space-between; padding:14px 0 4px; margin-top:4px; }
+  .satisfaction .big{ font-family:'Rajdhani',sans-serif; font-weight:700; font-size:34px; }
+  .satisfaction .lbl{ font-size:12px; color:var(--text-dim); letter-spacing:0.4px; }
+
+  .actionbtn{
+    width:100%; text-align:center; font-family:'Rajdhani',sans-serif; font-weight:600; font-size:13.5px;
+    color:var(--go); border:1px solid var(--go); background:var(--go-dim); border-radius:8px; padding:11px; cursor:pointer; margin-top:8px;
+  }
+  .actionbtn:disabled{ opacity:0.4; cursor:not-allowed; }
+  .resetbtn{ font-size:11px; color:var(--text-faint); background:none; border:1px solid var(--line); border-radius:6px; padding:5px 10px; cursor:pointer; margin-top:10px; }
+  .resetbtn:hover{ color:var(--bad); border-color:var(--bad); }
+  .resetbtn.wide{ width:100%; text-align:center; }
+
+  .result-box{ margin-top:10px; font-size:12.5px; line-height:1.6; color:var(--text-dim); }
+  .result-box b{ color:var(--text); }
+  .diffline{ font-family:'JetBrains Mono',monospace; font-size:12px; margin:2px 0; }
+  .diffline .arrow{ color:var(--text-faint); }
+  .diffline .changed{ color:var(--go); }
+
+  .log-item{ font-size:12.5px; line-height:1.55; padding:9px 0; border-top:1px solid var(--line); color:var(--text-dim); }
+  .log-item:first-child{ border-top:none; }
+  .log-item .ts{ color:var(--text-faint); font-family:'JetBrains Mono',monospace; font-size:11px; }
+  .log-item .tag{ font-family:'Rajdhani',sans-serif; font-weight:600; font-size:11px; padding:1px 7px; border-radius:4px; margin-left:6px; }
+  .tag-test{ background:var(--driverA-dim); color:var(--driverA); }
+  .tag-applied{ background:var(--go-dim); color:var(--go); }
+  .empty-note{ font-size:12.5px; color:var(--text-faint); padding:6px 0; }
+
+  .footnote{ font-size:11.5px; color:var(--text-faint); margin-top:16px; line-height:1.5; text-align:center; }
+  .credit{ font-size:11px; color:var(--text-faint); margin-top:6px; text-align:center; }
+  .credit a{ color:var(--text-dim); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="brand">
+      <span class="mark">SETUP GARAGE</span>
+      <span class="sub">F1 Manager 24 companion</span>
+    </div>
+    <select id="trackSelect"></select>
+  </div>
+
+  <div class="drivertabs">
+    <div class="drivertab active" data-driver="A"><input id="nameA" value="Driver 1" maxlength="18"></div>
+    <div class="drivertab" data-driver="B"><input id="nameB" value="Driver 2" maxlength="18"></div>
+  </div>
+
+  <div class="grid">
+    <div class="panel">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <h2 id="carSetupHeading" style="margin:0;">CAR SET-UP</h2>
+        <button class="resetbtn" id="lockToggle" style="margin:0;">🔒 Locked</button>
+      </div>
+      <div id="sliders"></div>
+      <div id="presetNote" style="font-size:11px; color:var(--text-faint); margin:8px 0 6px;"></div>
+      <button class="resetbtn wide" id="resetToPreset">Reset to community starting point</button>
+    </div>
+
+    <div class="panel">
+      <h2>DRIVER SET-UP SATISFACTION</h2>
+      <div id="balances"></div>
+      <div class="satisfaction">
+        <div>
+          <div class="lbl">OVERALL SATISFACTION</div>
+          <div class="lbl" id="overallWord" style="font-size:14px;margin-top:2px;"></div>
+        </div>
+        <div class="big" id="overallPct">—</div>
+      </div>
+      <button class="actionbtn" id="recordTest" style="background:var(--driverA-dim); border-color:var(--driverA); color:var(--driverA);">Record this test</button>
+      <div style="font-size:11px; color:var(--text-faint); margin-top:6px; line-height:1.4;">
+        Set feedback for what your driver actually reported after a run, then record it — this feeds the calculator below. Give at least one rating other than Unknown.
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:14px;">
+    <h2>CALCULATE OPTIMAL SETUP</h2>
+    <div style="font-size:12px; color:var(--text-dim); line-height:1.5; margin-bottom:8px;">
+      Searches every valid slider combination and keeps the ones consistent with every test you've recorded.
+    </div>
+    <button class="actionbtn" id="calcBtn">Calculate</button>
+    <div class="result-box" id="calcResult"></div>
+  </div>
+
+  <div class="panel" style="margin-top:14px;">
+    <h2>TEST &amp; CHANGE LOG</h2>
+    <div id="testLog"></div>
+    <button class="resetbtn wide" id="clearLog" style="margin-top:10px;">Clear log for this driver/track</button>
+  </div>
+
+  <button class="resetbtn wide" id="resetAll" style="margin-top:14px;">Clear all saved setups</button>
+
+  <div class="footnote">
+    Track starting points are a community-sourced list and are a starting point, not a guaranteed optimal setup.
+  </div>
+
+</div>
+
+<script>
+/* ============================================================
+   REAL DATA — ported from iebb/F1Manager-Calc (consts/params.js)
+   https://github.com/iebb/F1Manager-Calc — MIT License
+   ============================================================ */
+
+const SLIDER_ORDER = ["fw","rw","arb","camber","toe"];
+
+// min/max/step are in "raw param" space exactly as the source defines them.
+// camber's raw param is a POSITIVE magnitude (2.7–3.5); the UI shows it negative.
+const SLIDER_DEFS = {
+  fw:     { key:"fw",     label:"Front Angle", unit:"°", min:0,   max:10,  step:0.5,  decimals:1 },
+  rw:     { key:"rw",     label:"Rear Angle",  unit:"°", min:9,   max:16,  step:0.5,  decimals:1 },
+  arb:     { key:"arb",   label:"Anti-Roll",   unit:"",  min:1,   max:9,   step:1,    decimals:0,
+             display:(v)=> `${(10-v).toFixed(0)}:${v.toFixed(0)}` },
+  camber: { key:"camber", label:"Tyre Camber", unit:"°", min:2.7, max:3.5, step:0.05, decimals:2,
+             toParam:(v)=> -v, fromParam:(p)=> -p, display:(v)=> `${v.toFixed(2)}°` },
+  toe:    { key:"toe",    label:"Toe-Out",     unit:"°", min:0,   max:1,   step:0.05, decimals:2 },
+};
+
+const CATS = ["oversteer","braking","cornering","traction","straights"];
+const CAT_LABEL = { oversteer:"Oversteer", braking:"Braking Stability", cornering:"Cornering", traction:"Traction", straights:"Straights" };
+
+// effect[] order matches SLIDER_ORDER: [fw, rw, arb, camber, toe]
+const BIAS_DEFS = {
+  oversteer:  { offset:0.5,  effect:[ 0.4,  -0.4, -0.1,  0.1,  0    ] },
+  braking:    { offset:0.45, effect:[-0.2,   0.2,  0.15,-0.25, 0.2  ] },
+  cornering:  { offset:0.2,  effect:[ 0.3,   0.25,-0.15, 0.25,-0.05 ] },
+  traction:   { offset:0.25, effect:[-0.15,  0.25, 0.5, -0.1,  0    ] },
+  straights:  { offset:1,    effect:[-0.1,  -0.9,  0,    0,    0    ] },
+};
+
+const HINTS = {
+  fw:     "Front Angle mainly biases Cornering and Braking Stability up, and Straights down. Small effect on Oversteer and Traction.",
+  rw:     "Rear Angle biases Cornering, Braking Stability and Traction up, and Straights down heavily — the single biggest lever on top speed.",
+  arb:    "Anti-Roll shifted toward the rear biases Traction and Oversteer up, and Cornering down slightly. No effect on Straights.",
+  camber: "More negative Tyre Camber biases Cornering, Traction and Braking Stability up, at a small cost to Straights.",
+  toe:    "More Toe-Out biases Braking Stability up and Cornering down. No effect on Straights.",
+};
+
+const eps = 1e-6;
+const OPT_BP = 39/5600;
+const GREAT_BP = 0.04 + eps;
+const GOOD_BP = 0.1 + eps;
+const MAX_CANDIDATES = 50;
+
+function toParam(key, v){ const d = SLIDER_DEFS[key]; return d.toParam ? d.toParam(v) : v; }
+function fromParam(key, p){ const d = SLIDER_DEFS[key]; return d.fromParam ? d.fromParam(p) : p; }
+function v01(key, storedValue){
+  const d = SLIDER_DEFS[key];
+  const p = toParam(key, storedValue);
+  return (p - d.min) / (d.max - d.min);
+}
+
+function setupToBias(sliders){
+  const v = SLIDER_ORDER.map(k => v01(k, sliders[k]));
+  const out = {};
+  CATS.forEach(cat => {
+    const bd = BIAS_DEFS[cat];
+    let sum = bd.offset;
+    for(let i=0;i<5;i++) sum += v[i] * bd.effect[i];
+    out[cat] = sum;
+  });
+  return out;
+}
+
+/* ============================================================
+   TRACK PRESETS (community starting points — separate from the
+   verified math above; still just a starting point per track)
+   ============================================================ */
+
+const TRACKS = [
+  "Bahrain — Sakhir","Saudi Arabia — Jeddah","Australia — Melbourne","Japan — Suzuka",
+  "China — Shanghai","Miami — Miami","Emilia Romagna — Imola","Monaco — Monte Carlo",
+  "Canada — Montréal","Spain — Catalunya","Austria — Red Bull Ring","Britain — Silverstone",
+  "Hungary — Hungaroring","Belgium — Spa","Netherlands — Zandvoort","Italy — Monza",
+  "Azerbaijan — Baku","Singapore — Marina Bay","USA — Austin","Mexico — Mexico City",
+  "Brazil — Interlagos","Las Vegas — Las Vegas","Qatar — Losail","Abu Dhabi — Yas Marina"
+];
+
+// fw/rw as shown; arb stored as rear-share (1-9); camber stored as POSITIVE magnitude; toe as shown.
+// Values clamped into the real ranges above (fw 0-10, rw 9-16, arb 1-9, camber 2.7-3.5, toe 0-1).
+const TRACK_PRESETS = {
+  "Bahrain — Sakhir":          { fw:4.5, rw:11,   arb:4, camber:3.35, toe:0.35 },
+  "Saudi Arabia — Jeddah":     { fw:7,   rw:11,   arb:1, camber:3.5,  toe:0 },
+  "Australia — Melbourne":     { fw:8,   rw:13,   arb:3, camber:3.15, toe:0.65 },
+  "Japan — Suzuka":            { fw:7,   rw:13,   arb:5, camber:3.5,  toe:0 },
+  "China — Shanghai":          { fw:3,   rw:11.5, arb:8, camber:2.8,  toe:0.8 },
+  "Miami — Miami":             { fw:7.5, rw:13.5, arb:7, camber:3.5,  toe:0.35 },
+  "Emilia Romagna — Imola":    { fw:6.5, rw:13,   arb:6, camber:3.5,  toe:0 },
+  "Monaco — Monte Carlo":      { fw:10,  rw:16,   arb:2, camber:3.35, toe:0.65 },
+  "Canada — Montréal":         { fw:3.5, rw:12,   arb:8, camber:3.15, toe:0.8 },
+  "Spain — Catalunya":         { fw:8.5, rw:14,   arb:3, camber:3.25, toe:0.8 },
+  "Austria — Red Bull Ring":   { fw:5,   rw:13,   arb:9, camber:3.1,  toe:0.8 },
+  "Britain — Silverstone":     { fw:6,   rw:11.5, arb:1, camber:3.25, toe:0.35 },
+  "Hungary — Hungaroring":     { fw:9.5, rw:15,   arb:8, camber:3.2,  toe:0.75 },
+  "Belgium — Spa":             { fw:3,   rw:9.5,  arb:6, camber:3.4,  toe:0.6 },
+  "Netherlands — Zandvoort":   { fw:9.5, rw:13.5, arb:4, camber:3.15, toe:0.9 },
+  "Italy — Monza":             { fw:1,   rw:9,    arb:9, camber:3,    toe:0.9 },
+  "Azerbaijan — Baku":         { fw:1.5, rw:10.5, arb:7, camber:2.95, toe:0.85 },
+  "Singapore — Marina Bay":    { fw:8,   rw:15.5, arb:2, camber:2.75, toe:1 },
+  "USA — Austin":              { fw:8,   rw:13,   arb:8, camber:3.45, toe:0.25 },
+  "Mexico — Mexico City":      { fw:6.5, rw:13,   arb:8, camber:3.45, toe:0.35 },
+  "Brazil — Interlagos":       { fw:7,   rw:13,   arb:8, camber:3.4,  toe:0.55 },
+  "Las Vegas — Las Vegas":     { fw:0,   rw:10.5, arb:9, camber:3,    toe:0.55 },
+  "Qatar — Losail":            { fw:8,   rw:13,   arb:3, camber:3.35, toe:0.9 },
+  "Abu Dhabi — Yas Marina":    { fw:5,   rw:12.5, arb:7, camber:3.3,  toe:0.95 },
+};
+
+function presetFor(trackName, key){
+  const def = SLIDER_DEFS[key];
+  const p = TRACK_PRESETS[trackName];
+  const rawMagnitude = (p && p[key] !== undefined) ? p[key] : (def.min + (def.max - def.min) / 2);
+  return def.toParam ? -rawMagnitude : rawMagnitude; // presets store camber as positive magnitude; UI value is negative
+}
+
+/* ============================================================
+   STATE
+   ============================================================ */
+
+const FEEDBACK_OPTIONS = [
+  { key:"unknown",  label:"Unknown" },
+  { key:"optimal",  label:"Optimal" },
+  { key:"great",    label:"Great" },
+  { key:"good",     label:"Good" },
+  { key:"bad_high", label:"Bad (High)" },
+  { key:"bad_low",  label:"Bad (Low)" },
+];
+const FEEDBACK_SCORE = { optimal:100, great:88, good:68, bad_high:20, bad_low:20 };
+const STORAGE_KEY = "f1m24_setup_garage_v2";
+
+function defaultDriverState(){ return { name:null, byTrack:{} }; }
+
+function defaultTrackState(trackName){
+  const sliders = {};
+  SLIDER_ORDER.forEach(k => sliders[k] = presetFor(trackName, k));
+  const feedback = {};
+  CATS.forEach(c => feedback[c] = "unknown");
+  return { sliders, feedback, tests:[], log:[] };
+}
+
+let state = loadState();
+let slidersLocked = true; // session-only, not persisted — always starts locked on load
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return { activeDriver:"A", track:TRACKS[0], drivers:{ A:defaultDriverState(), B:defaultDriverState() } };
+}
+function saveState(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){} }
+
+function clampToDef(key, v){
+  const d = SLIDER_DEFS[key];
+  const lo = d.toParam ? -d.max : d.min;
+  const hi = d.toParam ? -d.min : d.max;
+  return Math.max(Math.min(lo,hi), Math.min(Math.max(lo,hi), v));
+}
+
+function getTrackState(driverKey){
+  const d = state.drivers[driverKey];
+  if(!d.byTrack[state.track]) d.byTrack[state.track] = defaultTrackState(state.track);
+  const t = d.byTrack[state.track];
+  if(!t.feedback){ t.feedback = {}; CATS.forEach(c => t.feedback[c] = "unknown"); }
+  if(!t.tests) t.tests = [];
+  if(!t.log) t.log = [];
+  SLIDER_ORDER.forEach(k => { t.sliders[k] = clampToDef(k, t.sliders[k]); });
+  return t;
+}
+
+/* ============================================================
+   RENDERING
+   ============================================================ */
+
+function renderTrackOptions(){
+  const sel = document.getElementById("trackSelect");
+  sel.innerHTML = "";
+  TRACKS.forEach(t => {
+    const opt = document.createElement("option");
+    opt.value = t; opt.textContent = t;
+    if(t === state.track) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
+function renderSliders(){
+  const driverKey = state.activeDriver;
+  const t = getTrackState(driverKey);
+  const box = document.getElementById("sliders");
+  box.innerHTML = "";
+
+  SLIDER_ORDER.forEach(key => {
+    const def = SLIDER_DEFS[key];
+    // uiA = UI value where v01=0 (least effect), uiB = UI value where v01=1 (most effect)
+    const uiA = def.toParam ? -def.min : def.min;
+    const uiB = def.toParam ? -def.max : def.max;
+    const nativeLo = Math.min(uiA, uiB), nativeHi = Math.max(uiA, uiB);
+    const needsMirror = uiA > uiB; // native ascending order would put v01=0 on the right, so flip visually
+    const fmt = (v) => def.display ? def.display(v) : v.toFixed(def.decimals) + def.unit;
+    const dispVal = fmt(t.sliders[key]);
+
+    const row = document.createElement("div");
+    row.className = "slider-row";
+    row.innerHTML = `
+      <div class="rowtop">
+        <label>${def.label}</label>
+        <span class="val" id="val-${key}">${dispVal}</span>
+      </div>
+      <input type="range" id="slide-${key}" min="${nativeLo}" max="${nativeHi}" step="${def.step}" value="${t.sliders[key]}" ${slidersLocked ? 'disabled' : ''}>
+      <div class="rangehint">Range: ${fmt(uiA)} to ${fmt(uiB)}</div>
+      <span class="hint-toggle" data-key="${key}">what does this affect? ⌄</span>
+      <div class="hint-text" id="hint-${key}">${HINTS[key]}</div>
+    `;
+    box.appendChild(row);
+
+    const input = row.querySelector(`#slide-${key}`);
+    if(needsMirror) input.style.transform = "scaleX(-1)";
+
+    input.addEventListener("input", (e) => {
+      const t2 = getTrackState(state.activeDriver);
+      t2.sliders[key] = parseFloat(e.target.value);
+      document.getElementById(`val-${key}`).textContent = fmt(t2.sliders[key]);
+      saveState();
+    });
+  });
+
+  box.querySelectorAll(".hint-toggle").forEach(el => {
+    el.addEventListener("click", () => document.getElementById(`hint-${el.dataset.key}`).classList.toggle("open"));
+  });
+
+  const preset = TRACK_PRESETS[state.track];
+  const note = document.getElementById("presetNote");
+  if(preset){
+    const matches = SLIDER_ORDER.every(k => Math.abs(t.sliders[k] - presetFor(state.track, k)) < 1e-6);
+    note.textContent = matches ? "Matches the community starting point for this track." : "Differs from the community starting point — whatever you've set since.";
+  } else {
+    note.textContent = "";
+  }
+}
+
+function overallLabel(pct){
+  if(pct === null) return { label:"No feedback yet", cls:"" };
+  if(pct >= 92) return { label:"Optimal", cls:"great" };
+  if(pct >= 78) return { label:"Great", cls:"great" };
+  if(pct >= 55) return { label:"Good", cls:"ok" };
+  return { label:"Needs Work", cls:"poor" };
+}
+
+function renderBalances(){
+  const driverKey = state.activeDriver;
+  const t = getTrackState(driverKey);
+  const box = document.getElementById("balances");
+  box.innerHTML = "";
+  let total = 0, count = 0;
+
+  CATS.forEach(cat => {
+    const current = t.feedback[cat];
+    if(current !== "unknown"){ total += FEEDBACK_SCORE[current]; count++; }
+
+    const row = document.createElement("div");
+    row.className = "bal-row";
+    row.innerHTML = `
+      <div class="bal-top"><span class="name">${CAT_LABEL[cat]}</span></div>
+      <div class="feedback-pills" data-cat="${cat}">
+        ${FEEDBACK_OPTIONS.map(o => `<button type="button" class="pill ${o.key.startsWith('bad') ? 'pill-bad' : (o.key==='unknown'?'pill-unknown':'')} ${current === o.key ? 'active' : ''}" data-cat="${cat}" data-val="${o.key}">${o.label}</button>`).join("")}
+      </div>
+    `;
+    box.appendChild(row);
+  });
+
+  const pct = count ? Math.round(total / count) : null;
+  const lbl = overallLabel(pct);
+  document.getElementById("overallPct").textContent = pct === null ? "—" : pct + "%";
+  const wordEl = document.getElementById("overallWord");
+  wordEl.textContent = lbl.label;
+  wordEl.className = lbl.cls;
+
+  box.querySelectorAll(".pill").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const t2 = getTrackState(state.activeDriver);
+      t2.feedback[btn.dataset.cat] = btn.dataset.val;
+      saveState();
+      renderBalances();
+    });
+  });
+}
+
+function fmtTime(ts){
+  const d = new Date(ts);
+  return d.toLocaleDateString(undefined,{month:"short",day:"numeric"}) + " " + d.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"});
+}
+
+function sliderSummary(sliders){
+  return SLIDER_ORDER.map(k => {
+    const def = SLIDER_DEFS[k];
+    return `${def.label} ${def.display ? def.display(sliders[k]) : sliders[k].toFixed(def.decimals)+def.unit}`;
+  }).join(" · ");
+}
+
+function feedbackSummary(feedback){
+  const bits = CATS.filter(c => feedback[c] !== "unknown").map(c => `${CAT_LABEL[c]}: ${FEEDBACK_OPTIONS.find(o=>o.key===feedback[c]).label}`);
+  return bits.length ? bits.join(" · ") : "no feedback given";
+}
+
+function renderLog(){
+  const t = getTrackState(state.activeDriver);
+  const box = document.getElementById("testLog");
+  const entries = [...t.tests.map(x=>({...x,type:"test"})), ...t.log.map(x=>({...x,type:"applied"}))]
+    .sort((a,b)=>b.ts-a.ts).slice(0,12);
+
+  if(!entries.length){
+    box.innerHTML = `<div class="empty-note">No tests recorded yet for this driver/track.</div>`;
+    return;
+  }
+
+  box.innerHTML = entries.map(e => {
+    const tag = e.type === "test" ? '<span class="tag tag-test">TEST</span>' : '<span class="tag tag-applied">APPLIED</span>';
+    const line2 = e.type === "test" ? feedbackSummary(e.feedback) : (e.label || "setup changed");
+    return `<div class="log-item">
+      <span class="ts">${fmtTime(e.ts)}</span>${tag}<br>
+      <span>${sliderSummary(e.sliders)}</span><br>
+      <span style="color:var(--text-faint);">${line2}</span>
+    </div>`;
+  }).join("");
+}
+
+/* ============================================================
+   RECORD TEST
+   ============================================================ */
+
+document.getElementById("recordTest").addEventListener("click", () => {
+  const t = getTrackState(state.activeDriver);
+  const hasFeedback = CATS.some(c => t.feedback[c] !== "unknown");
+  if(!hasFeedback){ alert("Give at least one rating other than Unknown before recording."); return; }
+  const bias = setupToBias(t.sliders);
+  t.tests.push({ ts:Date.now(), sliders:{...t.sliders}, feedback:{...t.feedback}, bias });
+  if(t.tests.length > 30) t.tests.shift();
+  saveState();
+  renderLog();
+});
+
+/* ============================================================
+   CALCULATE — brute-force solver, ported from libs/setup.js
+   ============================================================ */
+
+function feedbackBreak(cat, candidateVal, entry){
+  const fb = entry.feedback[cat], v = entry.bias[cat], x = candidateVal;
+  const dx = Math.abs(x - v);
+  switch(fb){
+    case "bad_high": return (v - x) < GOOD_BP;
+    case "bad_low":  return (v - x) > -GOOD_BP;
+    case "good":     return dx > GOOD_BP || dx < GREAT_BP;
+    case "great":    return dx > GREAT_BP || dx < OPT_BP;
+    case "optimal":  return dx >= OPT_BP;
+    default: return false; // unknown -> no constraint
+  }
+}
+
+document.getElementById("calcBtn").addEventListener("click", () => {
+  const driverKey = state.activeDriver;
+  const t = getTrackState(driverKey);
+  const resultBox = document.getElementById("calcResult");
+
+  const feedbackByCat = {};
+  CATS.forEach(c => feedbackByCat[c] = []);
+  t.tests.forEach(test => CATS.forEach(c => { if(test.feedback[c] !== "unknown") feedbackByCat[c].push(test); }));
+
+  const hasAny = CATS.some(c => feedbackByCat[c].length > 0);
+  if(!hasAny){
+    resultBox.innerHTML = `<div class="empty-note">Record at least one test with feedback first.</div>`;
+    return;
+  }
+
+  resultBox.innerHTML = `<div class="empty-note">Calculating…</div>`;
+
+  setTimeout(() => {
+    const steps = {};
+    SLIDER_ORDER.forEach(k => { const d = SLIDER_DEFS[k]; steps[k] = Math.round((d.max - d.min) / d.step); });
+
+    const currentBias = setupToBias(t.sliders);
+    let lowestBreaks = Infinity;
+    let totalAtLowest = 0;
+    let candidates = [];
+
+    for(let ifw=0; ifw<=steps.fw; ifw++){
+      const vfw = ifw/steps.fw;
+      for(let irw=0; irw<=steps.rw; irw++){
+        const vrw = irw/steps.rw;
+        for(let iarb=0; iarb<=steps.arb; iarb++){
+          const varb = iarb/steps.arb;
+          for(let icam=0; icam<=steps.camber; icam++){
+            const vcam = icam/steps.camber;
+            for(let itoe=0; itoe<=steps.toe; itoe++){
+              const vtoe = itoe/steps.toe;
+              const vArr = [vfw,vrw,varb,vcam,vtoe];
+
+              const bias = {};
+              let breaks = 0;
+              for(const cat of CATS){
+                const bd = BIAS_DEFS[cat];
+                let sum = bd.offset;
+                for(let i=0;i<5;i++) sum += vArr[i]*bd.effect[i];
+                bias[cat] = sum;
+                for(const entry of feedbackByCat[cat]){
+                  if(feedbackBreak(cat, sum, entry)) breaks++;
+                }
+                if(breaks > lowestBreaks) break;
+              }
+
+              if(breaks < lowestBreaks){ lowestBreaks = breaks; candidates = []; totalAtLowest = 0; }
+              if(breaks === lowestBreaks){
+                totalAtLowest++;
+                let diff = 0;
+                for(const cat of CATS) diff += Math.min(Math.abs(bias[cat]-currentBias[cat]), 0.2) * 100;
+                if(candidates.length < MAX_CANDIDATES){
+                  candidates.push({ v:vArr, diff });
+                } else if(diff < candidates[candidates.length-1].diff){
+                  candidates.push({ v:vArr, diff });
+                  candidates.sort((a,b)=>a.diff-b.diff);
+                  candidates = candidates.slice(0, MAX_CANDIDATES);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    candidates.sort((a,b)=>a.diff-b.diff);
+    if(!candidates.length){
+      resultBox.innerHTML = `<div class="empty-note">No setup satisfies all recorded feedback — your feedback may be contradictory. Try clearing an older test.</div>`;
+      return;
+    }
+
+    const best = candidates[0];
+    const bestSliders = {};
+    SLIDER_ORDER.forEach((k,i) => {
+      const d = SLIDER_DEFS[k];
+      const raw = d.min + best.v[i]*(d.max-d.min);
+      const rounded = Math.round(raw/d.step)*d.step;
+      bestSliders[k] = fromParam(k, rounded);
+    });
+
+    window.__lastCalc = bestSliders;
+
+    const lines = SLIDER_ORDER.map(k => {
+      const def = SLIDER_DEFS[k];
+      const oldV = t.sliders[k], newV = bestSliders[k];
+      const oldDisp = def.display ? def.display(oldV) : oldV.toFixed(def.decimals)+def.unit;
+      const newDisp = def.display ? def.display(newV) : newV.toFixed(def.decimals)+def.unit;
+      const changed = Math.abs(oldV-newV) > 1e-9;
+      return `<div class="diffline"><b>${def.label}</b>: ${oldDisp} <span class="arrow">→</span> <span class="${changed?'changed':''}">${newDisp}</span></div>`;
+    }).join("");
+
+    const fitLabel = lowestBreaks === 0
+      ? "Fully consistent with everything you've recorded"
+      : `Best available — still breaks ${lowestBreaks} of ${CATS.reduce((s,c)=>s+feedbackByCat[c].length,0)} feedback checks`;
+
+    resultBox.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:baseline; padding:8px 0; border-bottom:1px solid var(--line); margin-bottom:8px;">
+        <span style="font-size:11.5px; color:var(--text-faint); letter-spacing:0.4px;">POSSIBLE SETUPS REMAINING</span>
+        <span style="font-family:'Rajdhani',sans-serif; font-weight:700; font-size:22px; color:${lowestBreaks===0?'var(--go)':'var(--warn)'};">${totalAtLowest}</span>
+      </div>
+      <div style="font-size:11.5px; color:var(--text-faint); margin-bottom:10px;">${fitLabel} — showing the one closest to your current setup.</div>
+      ${lines}
+      <button class="actionbtn" id="applyCalc">Apply this setup</button>`;
+
+    document.getElementById("applyCalc").addEventListener("click", () => {
+      const t2 = getTrackState(state.activeDriver);
+      t2.log.push({ ts:Date.now(), sliders:{...bestSliders}, label:"Applied calculated setup" });
+      if(t2.log.length > 20) t2.log.shift();
+      SLIDER_ORDER.forEach(k => { t2.sliders[k] = bestSliders[k]; });
+      CATS.forEach(c => t2.feedback[c] = "unknown");
+      saveState();
+      renderSliders();
+      renderBalances();
+      renderLog();
+      resultBox.innerHTML = `<div class="empty-note">Applied — ratings reset to Unknown. Run this setup in-game, set your driver's feedback above, then Record this test.</div>`;
+      document.getElementById("carSetupHeading").scrollIntoView({ behavior:"smooth", block:"start" });
+    });
+  }, 30);
+});
+
+/* ============================================================
+   RESETS / MISC UI
+   ============================================================ */
+
+function renderDriverTabs(){
+  document.querySelectorAll(".drivertab").forEach(tab => tab.classList.toggle("active", tab.dataset.driver === state.activeDriver));
+}
+
+function initNames(){
+  const nameA = document.getElementById("nameA"), nameB = document.getElementById("nameB");
+  if(state.drivers.A.name) nameA.value = state.drivers.A.name;
+  if(state.drivers.B.name) nameB.value = state.drivers.B.name;
+  nameA.addEventListener("input", () => { state.drivers.A.name = nameA.value; saveState(); });
+  nameB.addEventListener("input", () => { state.drivers.B.name = nameB.value; saveState(); });
+}
+
+function renderAll(){
+  renderTrackOptions();
+  renderDriverTabs();
+  renderSliders();
+  renderBalances();
+  renderLog();
+  document.getElementById("calcResult").innerHTML = "";
+}
+
+document.querySelectorAll(".drivertab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    state.activeDriver = tab.dataset.driver;
+    saveState();
+    renderDriverTabs();
+    renderSliders();
+    renderBalances();
+    renderLog();
+    document.getElementById("calcResult").innerHTML = "";
+  });
+});
+
+document.getElementById("trackSelect").addEventListener("change", (e) => {
+  state.track = e.target.value;
+  saveState();
+  renderSliders();
+  renderBalances();
+  renderLog();
+  document.getElementById("calcResult").innerHTML = "";
+});
+
+document.getElementById("lockToggle").addEventListener("click", () => {
+  slidersLocked = !slidersLocked;
+  const btn = document.getElementById("lockToggle");
+  btn.textContent = slidersLocked ? "🔒 Locked" : "🔓 Unlocked — tap to lock";
+  renderSliders();
+});
+
+document.getElementById("resetToPreset").addEventListener("click", () => {
+  const t2 = getTrackState(state.activeDriver);
+  const target = {};
+  SLIDER_ORDER.forEach(k => target[k] = presetFor(state.track, k));
+  t2.log.push({ ts:Date.now(), sliders:{...target}, label:"Reset to community starting point" });
+  if(t2.log.length > 20) t2.log.shift();
+  SLIDER_ORDER.forEach(k => { t2.sliders[k] = target[k]; });
+  saveState();
+  renderSliders();
+  renderLog();
+});
+
+document.getElementById("clearLog").addEventListener("click", () => {
+  if(!confirm("Clear the test & change log for this driver on this track?")) return;
+  const t2 = getTrackState(state.activeDriver);
+  t2.tests = []; t2.log = [];
+  saveState();
+  renderLog();
+});
+
+document.getElementById("resetAll").addEventListener("click", () => {
+  if(!confirm("Clear every saved setup, test and log for both drivers, on every track?")) return;
+  state = { activeDriver:"A", track:TRACKS[0], drivers:{ A:defaultDriverState(), B:defaultDriverState() } };
+  saveState();
+  initNames();
+  renderAll();
+});
+
+initNames();
+renderAll();
+</script>
+</body>
+</html>
